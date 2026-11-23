@@ -1,0 +1,11 @@
+{
+  "name": "kaeloryn-studio-site",
+  "version": "1.0.0",
+  "description": "Site officiel de Kaeloryn Studio — RPG 2D Unwardened",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "admin": "node tools/mkadmin.js"
+  },
+  "engines": { "node": ">=22.5.0" }
+}
