@@ -136,6 +136,8 @@ function smtpSend({ to, subject, html }) {
     let buf = '', waiter = null, done = false;
     const finish = (err, r) => { if (!done) { done = true; try { sock.destroy(); } catch (e) {} err ? reject(err) : resolve(r); } };
     sock.on('error', finish);
+    sock.on('close', () => finish(done ? null : new Error('connexion SMTP fermée par le serveur')));
+    sock.on('end', () => finish(done ? null : new Error('connexion SMTP coupée (FIN reçu)')));
     sock.on('data', d => {
       buf += d.toString('utf8');
       let i;
@@ -205,8 +207,9 @@ const mailNote = async (kind, email, link) => {
       console.log(`[smtp] ${tag} envoyé à ${email}`);
       return 'sent';
     } catch (e) {
-      console.error(`[smtp] échec ${tag} → ${email} :`, e.message);
-      return 'err: ' + e.message;
+      const detail = (e && (e.message || e.code || e.reason)) || String(e);
+      console.error(`[smtp] échec ${tag} → ${email} :`, e && (e.stack || e.message || e));
+      return 'err: ' + detail;
     }
   }
   if (DEV) { console.log(`[mail:dev] ${tag} -> ${email}\n  ${link}`); return 'dev'; }
